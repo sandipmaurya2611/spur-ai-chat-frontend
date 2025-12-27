@@ -19,30 +19,27 @@ export const useChat = () => {
                 setIsLoadingHistory(true);
 
                 try {
-                    // Fetch history from backend
-                    const response = await fetch(`http://localhost:3000/chat/history/${storedSessionId}`);
+                    // Fetch history from backend using the service
+                    const data = await chatService.getHistory(storedSessionId);
 
-                    if (response.ok) {
-                        const data = await response.json();
+                    // Convert backend messages to frontend format
+                    const loadedMessages: Message[] = data.messages.map((msg) => ({
+                        id: msg.id,
+                        text: msg.text,
+                        sender: msg.sender === 'user' ? MessageSender.USER : MessageSender.AI,
+                        timestamp: msg.timestamp,
+                    }));
 
-                        // Convert backend messages to frontend format
-                        const loadedMessages: Message[] = data.messages.map((msg: any) => ({
-                            id: msg.id,
-                            text: msg.text,
-                            sender: msg.sender === 'user' ? MessageSender.USER : MessageSender.AI,
-                            timestamp: msg.timestamp,
-                        }));
-
-                        setMessages(loadedMessages);
-                        storage.setMessages(loadedMessages);
-                    } else {
-                        // If session not found on backend, clear local storage
-                        storage.clearSession();
-                        setSessionId(null);
-                    }
+                    setMessages(loadedMessages);
+                    storage.setMessages(loadedMessages);
                 } catch (error) {
-                    console.error('Error loading chat history:', error);
-                    // On error, try to load from localStorage as fallback
+                    console.error('Error loading chat history from backend:', error);
+
+                    // On error, clear current session to avoid further broken requests
+                    storage.clearSession();
+                    setSessionId(null);
+
+                    // Fallback: try to load from localStorage
                     const storedMessages = storage.getMessages();
                     if (storedMessages.length > 0) {
                         setMessages(storedMessages);
@@ -125,7 +122,8 @@ export const useChat = () => {
 
     return {
         messages,
-        isLoading: isLoading || isLoadingHistory,
+        isTyping: isLoading,
+        isLoading: isLoadingHistory,
         sendMessage,
         startNewChat,
     };

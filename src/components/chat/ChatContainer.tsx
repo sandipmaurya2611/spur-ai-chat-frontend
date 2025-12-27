@@ -4,7 +4,7 @@ import { ChatInput } from './ChatInput';
 import { useChat } from '../../hooks/useChat';
 
 export const ChatContainer: React.FC = () => {
-    const { messages, isLoading, sendMessage, startNewChat } = useChat();
+    const { messages, isTyping, isLoading, sendMessage, startNewChat } = useChat();
 
     return (
         <div className="chat-container">
@@ -24,11 +24,12 @@ export const ChatContainer: React.FC = () => {
 
             <MessageList
                 messages={messages}
+                isTyping={isTyping}
                 isLoading={isLoading}
                 onSendMessage={sendMessage}
             />
 
-            <ChatInput onSendMessage={sendMessage} disabled={isLoading} />
+            <ChatInput onSendMessage={sendMessage} disabled={isTyping} />
         </div>
     );
 };

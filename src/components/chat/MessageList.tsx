@@ -6,12 +6,18 @@ import { useAutoScroll } from '../../hooks/useAutoScroll';
 
 interface MessageListProps {
     messages: MessageType[];
+    isTyping: boolean;
     isLoading: boolean;
     onSendMessage: (text: string) => void;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, onSendMessage }) => {
-    const scrollRef = useAutoScroll<HTMLDivElement>([messages, isLoading]);
+export const MessageList: React.FC<MessageListProps> = ({
+    messages,
+    isTyping,
+    isLoading,
+    onSendMessage
+}) => {
+    const scrollRef = useAutoScroll<HTMLDivElement>([messages, isTyping, isLoading]);
 
     const quickQuestions = [
         "How do I track my order?",
@@ -48,7 +54,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, o
             {messages.map((message) => (
                 <Message key={message.id} message={message} />
             ))}
-            {isLoading && <TypingIndicator />}
+            {isTyping && <TypingIndicator />}
             <div ref={scrollRef} style={{ float: 'left', clear: 'both' }} />
         </div>
     );
